@@ -1,18 +1,6 @@
-import { useState } from 'react';
-import {
-  IconChevronDown,
-  IconHeart,
-  IconLogout,
-  IconMessage,
-  IconPlayerPause,
-  IconSettings,
-  IconStar,
-  IconSwitchHorizontal,
-  IconTrash,
-} from '@tabler/icons-react';
+import { memo, useState } from 'react';
 import cx from 'clsx';
 import {
-  Avatar,
   Burger,
   Container,
   Group,
@@ -22,53 +10,80 @@ import {
   UnstyledButton,
   Code,
   useMantineTheme,
+  Flex,
+  Button,
+  Modal,
+  TextInput,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import classes from './Header.module.css';
+import { ArrowRightLeft, ChevronDown, LogOut, Trash } from 'lucide-react';
+import { notifications } from '@mantine/notifications';
+import { AnnoyKating } from '../AnnoyKating/AnnoyKating';
 
-const user = {
-  name: 'Jane Spoonfighter',
-  email: 'janspoon@fighter.dev',
-  image: 'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-5.png',
-};
-
-const tabs = [
-  { value: '/', label: 'Home' },
-  { value: '/notes', label: 'Catatan' },
-  { value: '/practices', label: 'Latihan' },
-  { value: '/practices/2024-11-16', label: 'Kuis Pertemuan 2024-11-16' },
-];
-
-export function Header() {
+export const Header = memo(function Header() {
   const theme = useMantineTheme();
   const navigate = useNavigate();
   const location = useLocation();
-
-  const [opened, { toggle }] = useDisclosure(false);
+  const [menuOpened, menuActions] = useDisclosure(false);
   const [userMenuOpened, setUserMenuOpened] = useState(false);
+  const [loginModalOpened, setLoginModalOpened] = useState(false);
+  const [user, setUser] = useState({ name: 'Guest' });
+  const [userBuffer, setUserBuffer] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const tabs = [
+    { value: '/', label: 'Home' },
+    { value: '/notes', label: 'Catatan' },
+    { value: '/practices', label: 'Latihan' },
+    { value: '/practices/2024-11-16', label: 'Latihan Pertemuan 2024-11-16', featured: true },
+  ];
 
-  // Determine the active tab based on the current location
-  const activeTab = tabs.find((tab) => tab.value === location.pathname)?.value || '/';
+  const activeTab = location.pathname;
 
-  const items = tabs.map((tab) => (
+  const handleLogin = () => {
+    if (!userBuffer.trim()) {
+      setErrorMessage('Nama tidak bisa kosong.');
+      return;
+    }
+    setUser({ name: userBuffer });
+    setErrorMessage('');
+    setLoginModalOpened(false);
+  };
+
+  const tabItems = tabs.map((tab) => (
     <Tabs.Tab value={tab.value} key={tab.value}>
-      {tab.label}
+      <Flex>
+        {tab.featured && (
+          <>
+            <Text size="sm" color={theme.colors.yellow[7]} fw={700} mr={5}>
+              FEATURED
+            </Text>
+            <span style={{position: 'relative', bottom: -3}}>{tab.label}</span>
+          </>
+        )}
+        {!tab.featured && (
+          <>
+            <span>{tab.label}</span>
+          </>
+        )}
+      </Flex>
     </Tabs.Tab>
   ));
-
   return (
     <div className={classes.header}>
+      { activeTab !== '/practices/2024-11-16' ? (<AnnoyKating />) : null }
+
       <Container className={classes.mainSection} size="md">
         <Group justify="space-between">
           <div>
-            <Link to="/" style={{ marginRight: 10, fontFamily: 'monospace', fontStretch: '50%' }}>
+            <Link to="/" className={classes.brand}>
               UKM Programming oleh Reihan
             </Link>
-            <Code fw={700}>v0.0.1</Code>
+            <Code fw={700} ml={5}>v0.0.2</Code>
           </div>
 
-          <Burger opened={opened} onClick={toggle} hiddenFrom="xs" size="sm" />
+          <Burger opened={menuOpened} onClick={menuActions.toggle} hiddenFrom="xs" size="sm" />
 
           <Menu
             width={260}
@@ -79,51 +94,27 @@ export function Header() {
             withinPortal
           >
             <Menu.Target>
-              <UnstyledButton
-                className={cx(classes.user, { [classes.userActive]: userMenuOpened })}
-              >
+              <UnstyledButton className={cx(classes.user, { [classes.userActive]: userMenuOpened })}>
                 <Group gap={7}>
-                  <Avatar src={user.image} alt={user.name} radius="xl" size={20} />
-                  <Text fw={500} size="sm" lh={1} mr={3}>
-                    {user.name}
-                  </Text>
-                  <IconChevronDown size={12} stroke={1.5} />
+                  <Text fw={500} size="sm">{user.name}</Text>
+                  <ChevronDown size={12} strokeWidth={1.5} />
                 </Group>
               </UnstyledButton>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item
-                leftSection={<IconHeart size={16} color={theme.colors.red[6]} stroke={1.5} />}
-              >
-                Liked posts
-              </Menu.Item>
-              <Menu.Item
-                leftSection={<IconStar size={16} color={theme.colors.yellow[6]} stroke={1.5} />}
-              >
-                Saved posts
-              </Menu.Item>
-              <Menu.Item
-                leftSection={<IconMessage size={16} color={theme.colors.blue[6]} stroke={1.5} />}
-              >
-                Your comments
-              </Menu.Item>
-
               <Menu.Label>Settings</Menu.Label>
-              <Menu.Item leftSection={<IconSettings size={16} stroke={1.5} />}>
-                Account settings
+              <Menu.Item onClick={() => setLoginModalOpened(true)} leftSection={<ArrowRightLeft size={16} strokeWidth={1.5} />}>
+                {user.name === 'Guest' ? 'Login' : 'Change account'}
               </Menu.Item>
-              <Menu.Item leftSection={<IconSwitchHorizontal size={16} stroke={1.5} />}>
-                Change account
+              <Menu.Item onClick={() => setUser({ name: 'Guest' })} leftSection={<LogOut size={16} strokeWidth={1.5} />}>
+                Logout
               </Menu.Item>
-              <Menu.Item leftSection={<IconLogout size={16} stroke={1.5} />}>Logout</Menu.Item>
-
               <Menu.Divider />
-
-              <Menu.Label>Danger zone</Menu.Label>
-              <Menu.Item leftSection={<IconPlayerPause size={16} stroke={1.5} />}>
-                Pause subscription
-              </Menu.Item>
-              <Menu.Item color="red" leftSection={<IconTrash size={16} stroke={1.5} />}>
+              <Menu.Item
+                onClick={() => notifications.show({ title: 'This button does nothing!', message: 'kekw', color: 'red' })}
+                color="red"
+                leftSection={<Trash size={16} strokeWidth={1.5} />}
+              >
                 Delete account
               </Menu.Item>
             </Menu.Dropdown>
@@ -133,18 +124,32 @@ export function Header() {
       <Container size="md">
         <Tabs
           value={activeTab}
-          variant="outline"
-          visibleFrom="sm"
-          onChange={(value) => navigate(value)}
-          classNames={{
-            root: classes.tabs,
-            list: classes.tabsList,
-            tab: classes.tab,
-          }}
+          onChange={(value) => navigate(value || '/')}
+          classNames={{ root: classes.tabs, list: classes.tabsList, tab: classes.tab }}
         >
-          <Tabs.List>{items}</Tabs.List>
+          <Tabs.List>{tabItems}</Tabs.List>
         </Tabs>
       </Container>
+
+      <Modal opened={loginModalOpened} onClose={() => setLoginModalOpened(false)} title="Login" centered>
+        <Flex direction="column" gap="md">
+          <TextInput
+            id="login-modal-user-name"
+            value={userBuffer}
+            onChange={(e) => setUserBuffer(e.target.value)}
+            placeholder="Insert your full name here"
+            label="Full Name"
+            error={errorMessage}
+            withAsterisk
+            description="Data is local."
+          />
+          <Button onClick={handleLogin} w={100} ml="auto">
+            Login
+          </Button>
+        </Flex>
+      </Modal>
     </div>
   );
-}
+});
+
+export default Header;
