@@ -5,6 +5,7 @@ import { Practice20241116 } from './pages/practices/Practice20241116.page';
 import { NoteList } from './pages/NoteList.page';
 import Header from './components/Header/Header';
 import { Container } from '@mantine/core';
+import { Footer } from './components/Footer/Footer';
 
 const routes = [
   {
@@ -38,6 +39,8 @@ export function Router() {
           ))}
         </Routes>
       </Container>
+      
+      <Footer /> {/* i have got to read the docs cuz tf is this */}
 
     </BrowserRouter>
   );
