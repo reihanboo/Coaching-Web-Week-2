@@ -50,7 +50,7 @@ export function AnnoyKating() {
           <Text>
             {obfuscateText('Mohon baca dan nilai')}
             {' '}
-            <Link to='/practices/2024-11-16'>{obfuscateText('tugas pertemuan 2024-11-16')}</Link>
+            <Link to='/practices/2024-11-16'>{obfuscateText('tugas pertemuan ke-2 (2024-11-16)')}</Link>
             {' '}
             {obfuscateText('sebelum lanjut :)')}
           </Text>

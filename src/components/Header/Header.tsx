@@ -36,7 +36,7 @@ export const Header = memo(function Header() {
     { value: '/', label: 'Home' },
     { value: '/notes', label: 'Catatan' },
     { value: '/practices', label: 'Latihan' },
-    { value: '/practices/2024-11-16', label: 'Latihan Pertemuan 2024-11-16', featured: true },
+    { value: '/practices/2024-11-16', label: 'Latihan Pertemuan ke-2 (2024-11-16)', featured: true },
   ];
 
   const activeTab = location.pathname;
@@ -72,6 +72,7 @@ export const Header = memo(function Header() {
   ));
   return (
     <div className={classes.header}>
+      {/* TODO */}
       { activeTab !== '/practices/2024-11-16' ? (<AnnoyKating />) : null }
 
       <Container className={classes.mainSection} size="md">

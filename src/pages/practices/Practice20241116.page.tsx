@@ -5,6 +5,7 @@ import { TitleHyperlink } from '@/components/TitleHyperlink/TitleHyperlink';
 import MyIdentity from '@/components/MyIdentity/MyIdentity';
 import { Quote } from 'lucide-react';
 import { IMaskInput } from 'react-imask';
+import { notifications } from '@mantine/notifications';
 
 export function Practice20241116() {
   const [counter, setCounter] = useState(0);
@@ -13,7 +14,7 @@ export function Practice20241116() {
   const [tableData, setTableData] = useState([
     {
       name: 'M Reihan Fahlevi',
-      npm: 2428270001,
+      npm: '2428270001',
       github: 'reihanboo',
     }
   ]);
@@ -29,6 +30,8 @@ export function Practice20241116() {
   // only from 0-a bcs the higher the value the brighter the colour and i like my eyes
   // hey, they never specified that it has to be the full range of hexes
   const hexes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a']; 
+
+  const [factCheck, setFactCheck] = useState(false)
 
   useEffect(() => {
     if (counter > 0) {
@@ -55,14 +58,26 @@ export function Practice20241116() {
     setNpmError('');
 
     // wut happened to push, react?
-    setTableData(oldArray => [...oldArray, { name: fullName, npm: parseInt(npm), github: github }]);
+    setTableData(oldArray => [...oldArray, { name: fullName, npm: npm, github: github }]);
 
     setFullName('');
     setNpm('');
     setGithub('');
+
+    notifications.show({ title: 'Berhasil!', message: 'Data berhasil ditambahkan. Good job.', color: 'green' });
   }
 
-  const randomColour = () => {
+  const handleDelete = (index: number) => {
+    if (index === 0) {
+      notifications.show({ title: 'Gagal!', message: 'You can\'t delete me, mortal.', color: 'red' });
+      return;
+    }
+
+    setTableData((prevData) => prevData.filter((_, i) => i !== index));
+    notifications.show({ title: 'Deleted!', message: 'Data berhasil dihapus.', color: 'red' });
+  };
+
+  const randomColourAlsoFactCheck = () => {
     // rant, but consts are suppposed to be immutable, right? react just uses
     // them as if they're mutable (i.e.: let, var), and it's so weird to me 
     // coming from php. i'm not sure if i'm just being dumb or if it's a 
@@ -78,6 +93,8 @@ export function Practice20241116() {
     }
     
     document.body.style.backgroundColor = `#${hexCode}`;
+
+    setFactCheck(true);
   }
 
   return (
@@ -104,7 +121,7 @@ export function Practice20241116() {
 
       <TitleHyperlink title="Komponen Identitas" hyperref="myidentity" />
 
-      <MyIdentity data={tableData} />
+      <MyIdentity data={tableData} onDelete={handleDelete} />
 
       <Space h={'md'} />
 
@@ -124,12 +141,12 @@ export function Practice20241116() {
           value={fullName}
         />
 
-      <InputBase 
-          component={IMaskInput} 
-          mask="0000000000" 
+      <TextInput 
           placeholder="Masukkan nomor NPM"
           description="maks. 10 angka; min. 10 angka; hanya bisa angka; troll = ban" 
           label="NPM"
+          maxLength={10}
+          minLength={10}
           onChange={(event) => setNpm(event.currentTarget.value)}
           error={npmError}
           value={npm}
@@ -148,22 +165,21 @@ export function Practice20241116() {
 
       <Space h={'md'} />
 
-      <TitleHyperlink title="Mengubah warna background" hyperref="changeBackgroundColor" />
+      <TitleHyperlink title="Mengubah Warna Background" hyperref="changeBackgroundColor" />
 
       <Flex gap={5}>
-        <Button onClick={randomColour}>
+        <Button onClick={randomColourAlsoFactCheck}>
           Ubah warna background ke warna random
         </Button>
-        <Button color='red' onClick={() => { document.body.style.backgroundColor = 'var(--mantine-color-dark-7)' }}>
+        <Button color='red' onClick={() => { document.body.style.backgroundColor = 'var(--mantine-color-dark-7)'; setFactCheck(false) }}>
           Reset warna background
         </Button>
       </Flex>
 
-      <Space h={'xl'} />
-
-      <Image src="https://i.imgur.com/ZvJrVh0.gif" alt="Logo UKM Programming" style={{width: '500px', height: 'auto', marginTop: 20, marginLeft: 'auto', marginRight: 'auto'}} />
+      { factCheck &&
+      <Image src="https://i.imgur.com/ZvJrVh0.gif" alt="Logo UKM Programming" style={{width: '300px', height: 'auto', marginTop: 20, marginLeft: 'auto', marginRight: 'auto'}} /> 
+      }
       
-
     </BlogLayout>
   );
 }
