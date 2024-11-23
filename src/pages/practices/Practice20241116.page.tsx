@@ -26,6 +26,10 @@ export function Practice20241116() {
   const [fullNameError, setFullNameError] = useState('');
   const [npmError, setNpmError] = useState('');
 
+  // only from 0-a bcs the higher the value the brighter the colour and i like my eyes
+  // hey, they never specified that it has to be the full range of hexes
+  const hexes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a']; 
+
   useEffect(() => {
     if (counter > 0) {
       document.title = `Counter: ${counter}`;
@@ -58,6 +62,24 @@ export function Practice20241116() {
     setGithub('');
   }
 
+  const randomColour = () => {
+    // rant, but consts are suppposed to be immutable, right? react just uses
+    // them as if they're mutable (i.e.: let, var), and it's so weird to me 
+    // coming from php. i'm not sure if i'm just being dumb or if it's a 
+    // legitimate design flaw
+    // rant over
+    // if you're reading this and also needs an answer, read this:
+    // https://old.reddit.com/r/reactjs/comments/y7ah2e/why_do_we_use_const_for_usestate_instead_of_let/istdcg9/
+    // use cf warp or something, idk
+    let hexCode = '';
+    for (let i = 0; i < 6; i++) {
+      const randomIndex = Math.floor(Math.random() * hexes.length);
+      hexCode += hexes[randomIndex];
+    }
+    
+    document.body.style.backgroundColor = `#${hexCode}`;
+  }
+
   return (
     // manual dates are unironically the most cancerous thing i've ever typed
     <BlogLayout title='Pertemuan ke-2' author='M Reihan Fahlevi' date='2024-11-16'>
@@ -86,7 +108,7 @@ export function Practice20241116() {
 
       <Space h={'md'} />
 
-      <TitleHyperlink title="Menampilkan Input" hyperref="crud" />
+      <TitleHyperlink title="Menampilkan Input" hyperref="crudbutonlyc" />
 
       <Blockquote p={12} m={10} color="blue" cite="– Pertanyaan ke-empat pada kuis minggu ke-dua" icon={<Quote size={20} />} mt="xl">
         <Highlight highlight={"(boleh dengan cara apapun)"}>Membuat form yang memiliki input nama dan menampilkan nama di web (boleh dengan cara apapun).</Highlight>
@@ -124,9 +146,26 @@ export function Practice20241116() {
         Create
       </Button>
 
+      <Space h={'md'} />
+
+      <TitleHyperlink title="Mengubah warna background" hyperref="changeBackgroundColor" />
+
+      <Flex gap={5}>
+        <Button onClick={randomColour}>
+          Ubah warna background ke warna random
+        </Button>
+        <Button color='red' onClick={() => { document.body.style.backgroundColor = 'var(--mantine-color-dark-7)' }}>
+          Reset warna background
+        </Button>
+      </Flex>
+
+      <Space h={'xl'} />
+
       <Image src="https://i.imgur.com/ZvJrVh0.gif" alt="Logo UKM Programming" style={{width: '500px', height: 'auto', marginTop: 20, marginLeft: 'auto', marginRight: 'auto'}} />
       
 
     </BlogLayout>
   );
 }
+
+// i'm not gonna lie, i'm not proud of this
